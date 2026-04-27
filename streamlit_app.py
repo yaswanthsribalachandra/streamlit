@@ -1,46 +1,51 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+
 from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
 
-# Title
-st.title("📊 Simple Linear Regression App")
+# -------------------------------
+# STEP 1: Create Dummy Dataset
+# -------------------------------
+data = {
+    "area": [1000, 1500, 2000, 2500, 3000],
+    "bedrooms": [2, 3, 3, 4, 5],
+    "bathrooms": [1, 2, 2, 3, 4],
+    "floors": [1, 2, 2, 2, 3],
+    "age": [10, 5, 3, 2, 1],
+    "price": [50, 75, 100, 150, 200]  # in lakhs
+}
 
-# Sidebar inputs
-st.sidebar.header("Input Data")
+df = pd.DataFrame(data)
 
-# User input for X and Y
-num_points = st.sidebar.slider("Number of Data Points", 10, 100, 20)
+X = df.drop("price", axis=1)
+y = df["price"]
 
-# Generate random data
-np.random.seed(42)
-X = np.random.rand(num_points, 1) * 10
-y = 2.5 * X + np.random.randn(num_points, 1) * 2
-
-# Show dataset
-st.subheader("📂 Generated Dataset")
-df = pd.DataFrame({"X": X.flatten(), "y": y.flatten()})
-st.write(df)
-
-# Train model
+# -------------------------------
+# STEP 2: Train Model
+# -------------------------------
 model = LinearRegression()
 model.fit(X, y)
 
-# Prediction
-st.subheader("🔮 Make Prediction")
-input_value = st.number_input("Enter X value", value=5.0)
-prediction = model.predict([[input_value]])
+# -------------------------------
+# STEP 3: Streamlit UI
+# -------------------------------
+st.title("🏠 House Price Prediction App")
 
-st.write(f"Predicted y: {prediction[0][0]:.2f}")
+st.write("Enter house details to predict price")
 
-# Plot
-st.subheader("📈 Regression Line")
-fig, ax = plt.subplots()
-ax.scatter(X, y, color='blue', label='Data Points')
-ax.plot(X, model.predict(X), color='red', label='Regression Line')
-ax.set_xlabel("X")
-ax.set_ylabel("y")
-ax.legend()
+# Inputs
+area = st.number_input("Area (sq ft)", 500, 5000, 1000)
+bedrooms = st.number_input("Bedrooms", 1, 10, 2)
+bathrooms = st.number_input("Bathrooms", 1, 10, 1)
+floors = st.number_input("Floors", 1, 5, 1)
+age = st.number_input("Age of House (years)", 0, 50, 5)
 
-st.pyplot(fig)
+# -------------------------------
+# STEP 4: Prediction
+# -------------------------------
+if st.button("Predict Price"):
+    input_data = np.array([[area, bedrooms, bathrooms, floors, age]])
+    prediction = model.predict(input_data)
+
+    st.success(f"Estimated House Price: ₹ {prediction[0]:.2f} Lakhs")
